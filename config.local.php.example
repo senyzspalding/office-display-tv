@@ -1,0 +1,14 @@
+<?php
+// Copy to config.local.php and fill in real values. Never commit config.local.php.
+// Place it (with service-account.json) in SENYTV_PRIVATE_DIR, OUTSIDE the web root — see paths.php.
+
+// Password for admin.htm / save-config.php. Use a long random value.
+define('ADMIN_PASSWORD', 'change-me');
+
+// Shared secret that lets the TV read calendar-proxy.php (min. 24 characters).
+// Generate one with:  php -r 'echo bin2hex(random_bytes(24)), "\n";'
+// Then open the board ONCE on each TV as  https://YOUR-HOST/index.htm#key=<token>
+define('DISPLAY_TOKEN', 'change-me-to-a-long-random-string');
+
+// Optional: contact address sent to api.weather.gov in the User-Agent (NWS asks for one).
+// define('NWS_CONTACT', 'you@example.org');

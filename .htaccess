@@ -1,0 +1,9 @@
+# Block direct web access to secrets, caches, backups, notes and VCS data.
+# Requires Apache 2.4 with AllowOverride FileInfo/AuthConfig (or "All") for this folder.
+# NOTE: board-config.json is intentionally NOT listed — the display and admin pages read it.
+<FilesMatch "^(service-account\.json|config\.local\.php|.*-cache\.json|.*-bak|.*\.bak|.*\.md|.*\.example|.*\.example\.json|paths\.php|LICENSE|\.git.*)$">
+    Require all denied
+</FilesMatch>
+
+# No directory listings
+Options -Indexes

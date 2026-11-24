@@ -1,0 +1,27 @@
+{
+    "boardTitle": "Display Board",
+    "reloadInterval": 240,
+    "showAnnouncement": false,
+    "announcement": "",
+    "annExpireDate": "",
+    "annExpireTime": "",
+    "showNews": false,
+    "rssFeeds": [],
+    "calendars": [
+        { "id": "REPLACE_WITH_CALENDAR_ID_1@group.calendar.google.com", "label": "Internal Calendar",     "color": "#0081B5", "days": 2 },
+        { "id": "REPLACE_WITH_CALENDAR_ID_2@group.calendar.google.com", "label": "SENYLRC Public Events", "color": "#B58358", "days": 2 },
+        { "id": "REPLACE_WITH_CALENDAR_ID_3@group.calendar.google.com", "label": "Staff Schedule",        "color": "#517C5C", "days": 1 }
+    ],
+    "statusSites": [
+        { "name": "Example site", "url": "https://example.org" }
+    ],
+    "gmailCfg":     { "enabled": true, "name": "Gmail",           "productId":   "prPt2Yra2CbGsbEm9cpC" },
+    "zoomMeetCfg":  { "enabled": true, "name": "Zoom Meetings",   "componentId": "3z7b6jks10hm" },
+    "zoomPhoneCfg": { "enabled": true, "name": "Zoom Phone (NA)", "componentId": "gwtd6dbkck60" },
+    "showAnimals": true,
+    "animalOpacity": 45,
+    "animalInterval": 45,
+    "animalFeeds": ["cat", "dog", "fox", "duck", "bunny", "bird", "panda"],
+    "showWeather": true,
+    "weatherZones": "NYZ064"
+}

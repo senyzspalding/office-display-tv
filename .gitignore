@@ -1,0 +1,17 @@
+# Secrets
+service-account.json
+config.local.php
+
+# Live site state (real calendar IDs, announcements) — see board-config.example.json
+board-config.json
+
+# Runtime caches / live state
+*-cache.json
+announcement.txt
+
+# Internal ops notes (hosts, key paths, open security to-dos) — keep local only
+STATUS.md
+
+# Backups
+*-bak
+*.bak
