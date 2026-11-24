@@ -7,10 +7,11 @@
  * Keep the service account JSON key OUTSIDE the web root (see paths.php).
  *
  * ACCESS CONTROL: this endpoint returns private event titles/locations, so every
- * request must carry the display token in an "X-Display-Token" header. The token
- * is DISPLAY_TOKEN in config.local.php (gitignored). There is no CORS header, so
- * other websites cannot read the response from a visitor's browser. If
- * DISPLAY_TOKEN is not configured the endpoint refuses to serve anything.
+ * request must either come from a trusted IP (TRUSTED_IPS in config.local.php) or
+ * carry the display token in an "X-Display-Token" header (DISPLAY_TOKEN in
+ * config.local.php, gitignored). There is no CORS header, so other websites cannot
+ * read the response from a visitor's browser. If neither is configured the
+ * endpoint refuses to serve anything.
  *
  * SETUP:
  *   1. Upload this file to your server (e.g. /senytv/calendar-proxy.php)
@@ -59,13 +60,29 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
     header('Allow: GET');
     fail(405, 'Method not allowed');
 }
-if (!defined('DISPLAY_TOKEN') || !is_string(DISPLAY_TOKEN) || strlen(DISPLAY_TOKEN) < 24
-    || senytv_is_placeholder(DISPLAY_TOKEN)) {
-    error_log('calendar-proxy: DISPLAY_TOKEN missing, shorter than 24 chars, or still the example value');
+// Two ways in: (a) the request comes from a trusted IP (TRUSTED_IPS, e.g. the office
+// network's public IP — for devices like a Fire Stick that cannot easily hold a token),
+// or (b) it carries the display token. Only REMOTE_ADDR is used (never X-Forwarded-For,
+// which a client can forge); do not rely on TRUSTED_IPS if the site sits behind a proxy/CDN.
+$trusted = [];
+if (defined('TRUSTED_IPS') && is_array(TRUSTED_IPS)) {
+    foreach (TRUSTED_IPS as $ip) {
+        if (is_string($ip) && filter_var($ip, FILTER_VALIDATE_IP)) $trusted[] = $ip;   // exact addresses only, no ranges/wildcards
+    }
+}
+$tokenConfigured = defined('DISPLAY_TOKEN') && is_string(DISPLAY_TOKEN) && strlen(DISPLAY_TOKEN) >= 24
+                   && !senytv_is_placeholder(DISPLAY_TOKEN);
+if (!$trusted && !$tokenConfigured) {
+    error_log('calendar-proxy: neither TRUSTED_IPS nor a usable DISPLAY_TOKEN (>=24 chars, not the example) is configured');
     fail(503, 'Calendar service is not configured');
 }
-$presented = $_SERVER['HTTP_X_DISPLAY_TOKEN'] ?? '';
-if (!is_string($presented) || !hash_equals(DISPLAY_TOKEN, $presented)) {
+$remote  = $_SERVER['REMOTE_ADDR'] ?? '';
+$allowed = $remote !== '' && in_array($remote, $trusted, true);
+if (!$allowed && $tokenConfigured) {
+    $presented = $_SERVER['HTTP_X_DISPLAY_TOKEN'] ?? '';
+    $allowed = is_string($presented) && hash_equals(DISPLAY_TOKEN, $presented);
+}
+if (!$allowed) {
     fail(401, 'Not authorized');
 }
 

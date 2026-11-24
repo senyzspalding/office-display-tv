@@ -10,5 +10,11 @@ define('ADMIN_PASSWORD', 'change-me');
 // Then open the board ONCE on each TV as  https://YOUR-HOST/index.htm#key=<token>
 define('DISPLAY_TOKEN', 'change-me-to-a-long-random-string');
 
+// Optional: public IP address(es) allowed to read the calendars WITHOUT the token, e.g. the
+// office network's public IP (so a Fire Stick / TV needs no #key=). Exact addresses only.
+// Every device that reaches the internet through that IP (guest Wi-Fi too) is then trusted.
+// Do not use if the site is behind a proxy/CDN (the server would see the proxy's IP).
+// define('TRUSTED_IPS', ['203.0.113.10']);
+
 // Optional: contact address sent to api.weather.gov in the User-Agent (NWS asks for one).
 // define('NWS_CONTACT', 'you@example.org');

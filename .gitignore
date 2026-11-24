@@ -15,3 +15,6 @@ STATUS.md
 # Backups
 *-bak
 *.bak
+
+# Local deploy script (names the server)
+deploy.local.sh
