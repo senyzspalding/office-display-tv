@@ -97,7 +97,9 @@ $url = 'https://api.weather.gov/alerts/active?point=' . urlencode($point) . '&st
 // NWS asks API clients to identify themselves. The contact address is read from
 // config.local.php (optional NWS_CONTACT) so it is not published in source control.
 require_once __DIR__ . '/paths.php';
-if (file_exists(senytv_private_file('config.local.php'))) require_once senytv_private_file('config.local.php');
+// Optional setting only: if the private dir is unavailable, just send the generic User-Agent.
+$privateDir = senytv_private_dir();
+if ($privateDir !== null && is_file($privateDir . '/config.local.php')) require_once $privateDir . '/config.local.php';
 $ua = 'SENYLRC-DisplayBoard/1.0' . (defined('NWS_CONTACT') && NWS_CONTACT ? ' (' . NWS_CONTACT . ')' : '');
 $ctx = stream_context_create(['http' => [
     'timeout'       => 8,

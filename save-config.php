@@ -9,11 +9,14 @@
 // Kept OUT of version control and out of the web root: define ADMIN_PASSWORD in
 // config.local.php inside SENYTV_PRIVATE_DIR (see paths.php, config.local.php.example).
 require_once __DIR__ . '/paths.php';
-if (file_exists(senytv_private_file('config.local.php'))) require senytv_private_file('config.local.php');
-if (!defined('ADMIN_PASSWORD')) {
-    http_response_code(500);
+// FAIL CLOSED: no private dir => no admin saves (there is no web-root fallback).
+$privateDir = senytv_private_dir();
+if ($privateDir !== null && is_file($privateDir . '/config.local.php')) require $privateDir . '/config.local.php';
+if ($privateDir === null || !defined('ADMIN_PASSWORD') || senytv_is_placeholder(ADMIN_PASSWORD)) {
+    error_log('save-config: SENYTV_PRIVATE_DIR unset/invalid, or ADMIN_PASSWORD missing/still the example value');
+    http_response_code(503);
     header('Content-Type: application/json');
-    echo json_encode(['error' => 'config.local.php missing — define ADMIN_PASSWORD']);
+    echo json_encode(['error' => 'Admin saving is not configured on the server']);
     exit;
 }
 

@@ -20,17 +20,7 @@
  *      inside service-account.json), permission "See all event details"
  */
 
-// ── Config ────────────────────────────────────────────────────────────────
 require_once __DIR__ . '/paths.php';
-// The key, the calendar cache (private event data) and config.local.php live in
-// SENYTV_PRIVATE_DIR, outside the document root (see paths.php).
-define('KEY_FILE',   senytv_private_file('service-account.json'));
-define('CACHE_FILE', senytv_private_file('calendar-cache.json'));
-define('CACHE_TTL',  120);  // seconds to cache
-define('MAX_EVENTS', 40);   // max events per calendar
-
-// Local secrets (DISPLAY_TOKEN) — kept out of version control and the web root.
-if (file_exists(senytv_private_file('config.local.php'))) require senytv_private_file('config.local.php');
 
 // ── Response headers ──────────────────────────────────────────────────────
 // Deliberately NO Access-Control-Allow-Origin: only same-origin pages (the
@@ -46,13 +36,32 @@ function fail($status, $message) {
     exit;
 }
 
+// ── Config ────────────────────────────────────────────────────────────────
+// The key, the calendar cache (private event data) and config.local.php live in
+// SENYTV_PRIVATE_DIR, outside the document root (see paths.php). FAIL CLOSED:
+// if that directory is not configured/valid, nothing is served — there is no
+// fallback to files inside the web root.
+$PRIVATE_DIR = senytv_private_dir();
+if ($PRIVATE_DIR === null) {
+    error_log('calendar-proxy: SENYTV_PRIVATE_DIR is not set, missing, or inside the web root');
+    fail(503, 'Calendar service is not configured');
+}
+define('KEY_FILE',   $PRIVATE_DIR . '/service-account.json');
+define('CACHE_FILE', $PRIVATE_DIR . '/calendar-cache.json');
+define('CACHE_TTL',  120);  // seconds to cache
+define('MAX_EVENTS', 40);   // max events per calendar
+
+// Local secrets (DISPLAY_TOKEN) — kept out of version control and the web root.
+if (is_file($PRIVATE_DIR . '/config.local.php')) require $PRIVATE_DIR . '/config.local.php';
+
 // ── Authenticate (before touching the cache or Google) ────────────────────
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
     header('Allow: GET');
     fail(405, 'Method not allowed');
 }
-if (!defined('DISPLAY_TOKEN') || !is_string(DISPLAY_TOKEN) || strlen(DISPLAY_TOKEN) < 24) {
-    error_log('calendar-proxy: DISPLAY_TOKEN missing or shorter than 24 chars in config.local.php');
+if (!defined('DISPLAY_TOKEN') || !is_string(DISPLAY_TOKEN) || strlen(DISPLAY_TOKEN) < 24
+    || senytv_is_placeholder(DISPLAY_TOKEN)) {
+    error_log('calendar-proxy: DISPLAY_TOKEN missing, shorter than 24 chars, or still the example value');
     fail(503, 'Calendar service is not configured');
 }
 $presented = $_SERVER['HTTP_X_DISPLAY_TOKEN'] ?? '';
